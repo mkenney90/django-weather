@@ -1,5 +1,20 @@
 {% extends 'base.html' %} {% block content %}
 
-<h1>Homepage</h1>
+{% if api %} 
+    {% if api == "error" %}
+        <b>There was an problem with the API request</b>
+    {% else %}
+
+        <div class="alert alert-{{ category_color }}">
+            <h1 class="display-4">Outlook for {{ api.0.ReportingArea }}</h1><br />
+
+            <p class="lead">Air Quality: {{ api.0.AQI }}</p>
+            <p class="lead">Category: {{ api.0.Category.Name }}</p>
+            <p class="lead">{{ api.0.Discussion }}</p>
+        </div>
+
+    {% endif %}
+
+{% endif %} 
 
 {% endblock %}
