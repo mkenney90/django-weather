@@ -1,16 +1,28 @@
 {% extends 'base.html' %} {% block content %}
 
-{% if api %} 
-    {% if api == "error" %}
-        <b>There was an problem with the API request</b>
+{{ zipcode }}
+
+{% if response %}
+    {% if response == "error" %}
+        <div class="alert alert-secondary">
+            <p class="lead">There was an problem with the API request.</p>
+        </div>
+    {% elif response == "notfound" %}
+        <div class="alert alert-secondary">
+            <p class="lead">The specified zipcode is invalid.</p>
+        </div>
     {% else %}
-
+    
+        <h1 class="display-4">Outlook for {{ response.aqi.0.ReportingArea }}</h1><br />
+        <div class="alert alert-secondary">
+            <p class="lead">{{ response.weather.properties.periods.0.name }}: {{ response.weather.properties.periods.0.temperature }} &#176;{{ response.weather.properties.periods.0.temperatureUnit }}</p>
+            <p class="lead">{{ response.weather.properties.periods.0.detailedForecast }}</p>
+            <img src="{{ response.weather.properties.periods.0.icon }} " style="position:absolute; right:2%; top:50%; transform:translateY(-50%); box-shadow: 1px 1px 5px -2px black";/>
+        </div>
         <div class="alert alert-{{ category_color }}">
-            <h1 class="display-4">Outlook for {{ api.0.ReportingArea }}</h1><br />
-
-            <p class="lead">Air Quality: {{ api.0.AQI }}</p>
-            <p class="lead">Category: {{ api.0.Category.Name }}</p>
-            <p class="lead">{{ api.0.Discussion }}</p>
+            <p class="lead">Air Quality: {{ response.aqi.0.AQI }}</p>
+            <p class="lead">Category: {{ response.aqi.0.Category.Name }}</p>
+            <p class="lead">{{ response.aqi.0.Discussion }}</p>
         </div>
 
     {% endif %}
