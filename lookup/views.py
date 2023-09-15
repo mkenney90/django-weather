@@ -6,7 +6,7 @@ from requests import request
 
 
 def home(request):
-    zipcode = 29609
+    zipcode = 90212
 
     if request.method == "POST":
         zipcode = request.POST["zipcode"]
@@ -17,6 +17,8 @@ def home(request):
         return render(request, "home.html", {"response": "error"})
     elif response == "notfound":
         return render(request, "home.html", {"response": "notfound"})
+    elif response == "throttled":
+        return render(request, "home.html", {"response": "throttled"})
     else:
         if response["aqi"][0]["Category"]["Name"] == "Good":
             category_color = "success"
@@ -49,7 +51,7 @@ def lookup(zipcode):
         + str(zipcode)
         + "&date="
         + today
-        + "&distance=5&API_KEY=69EF95CC-A676-4E15-B053-47E847D99EC6",
+        + "&API_KEY=69EF95CC-A676-4E15-B053-47E847D99EC6",
     )
     geo_requests = requests.get(
         "https://geocode.xyz/" + str(zipcode) + "?region=US&json=1"
@@ -59,9 +61,11 @@ def lookup(zipcode):
         geo = json.loads(geo_requests.content)
     except Exception as e:
         return "error"
-
+    
     if len(api) == 0 or "error" in geo:
         return "notfound"
+    elif len([v for v in geo.values() if type(v) is not dict and 'throttle' in v.lower()]):
+        return "throttled"
 
     if api != "error" and api != "notfound":
         latt = geo["latt"]
@@ -93,6 +97,6 @@ def lookup(zipcode):
         response = {"aqi": api}
 
         if weather != "error":
-            response["weather"] = weather
+            response["weather"] = weather["properties"]["periods"]
 
     return response

@@ -1,32 +1,67 @@
-{% extends 'base.html' %} {% block content %}
+{% extends 'base.html' %} {% block content %} {{ zipcode }} {% if response %}
+{% if response == "error" %}
+<div class="alert alert-secondary">
+    <p class="lead">There was an problem with the API request.</p>
+</div>
+{% elif response == "notfound" %}
+<div class="alert alert-secondary">
+    <p class="lead">The specified zipcode is invalid.</p>
+</div>
+{% elif response == "throttled" %}
+<div class="alert alert-secondary">
+    <p class="lead">The geolocator API is throttling requests, please try again in a moment.</p>
+</div>
+{% else %}
 
-{{ zipcode }}
+<h1 class="display-4">Outlook for {{ response.aqi.0.ReportingArea }}</h1>
+<br />
+<div class="alert alert-secondary">
+    <div class="inner-content">
+        <p class="lead">
+            {{ response.weather.0.name }}: 
+            {{ response.weather.0.temperature }} 
+            &#176;{{ response.weather.0.temperatureUnit }}
+        </p>
+        <p class="lead">
+            {{ response.weather.0.detailedForecast }}
+        </p>
+        <img
+            src="{{ response.weather.0.icon }} "
+            style="
+                position: absolute;
+                right: 2%;
+                top: 50%;
+                transform: translateY(-50%);
+                box-shadow: 1px 1px 5px -2px black;
+            "
+            ;
+        />
+        Chance of Precipition: 
+        {% if response.weather.0.probabilityOfPrecipitation.value %} 
+        {{ response.weather.0.probabilityOfPrecipitation.value }}%
+        {% else %}
+        None
+        {% endif %}
+    </div>
+    <hr>
+    <div class="inner-content">
+        <p class="lead">
+            {{ response.weather.1.name }}: 
+            {{ response.weather.1.temperature }} 
+            &#176;{{ response.weather.1.temperatureUnit }}
+        </p>
+    </div>
+</div>
+<div class="alert alert-{{ category_color }}">
+    <p class="lead">Air Quality: {{ response.aqi.0.AQI }}</p>
+    <p class="lead">Category: {{ response.aqi.0.Category.Name }}</p>
+    <p class="lead">{{ response.aqi.0.Discussion }}</p>
+</div>
 
-{% if response %}
-    {% if response == "error" %}
-        <div class="alert alert-secondary">
-            <p class="lead">There was an problem with the API request.</p>
-        </div>
-    {% elif response == "notfound" %}
-        <div class="alert alert-secondary">
-            <p class="lead">The specified zipcode is invalid.</p>
-        </div>
-    {% else %}
-    
-        <h1 class="display-4">Outlook for {{ response.aqi.0.ReportingArea }}</h1><br />
-        <div class="alert alert-secondary">
-            <p class="lead">{{ response.weather.properties.periods.0.name }}: {{ response.weather.properties.periods.0.temperature }} &#176;{{ response.weather.properties.periods.0.temperatureUnit }}</p>
-            <p class="lead">{{ response.weather.properties.periods.0.detailedForecast }}</p>
-            <img src="{{ response.weather.properties.periods.0.icon }} " style="position:absolute; right:2%; top:50%; transform:translateY(-50%); box-shadow: 1px 1px 5px -2px black";/>
-        </div>
-        <div class="alert alert-{{ category_color }}">
-            <p class="lead">Air Quality: {{ response.aqi.0.AQI }}</p>
-            <p class="lead">Category: {{ response.aqi.0.Category.Name }}</p>
-            <p class="lead">{{ response.aqi.0.Discussion }}</p>
-        </div>
+<style>
+    .inner-content {
+        position: relative;
+    }
+</style>
 
-    {% endif %}
-
-{% endif %} 
-
-{% endblock %}
+{% endif %} {% endif %} {% endblock %}
